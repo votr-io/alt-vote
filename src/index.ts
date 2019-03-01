@@ -1,6 +1,6 @@
 import { Observable, from } from 'rxjs';
 import { reduce } from 'rxjs/operators';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 const candidates = ['A', 'B', 'C', 'D'];
 
@@ -20,9 +20,9 @@ async function getResults({
   candidates: string[];
   fetchBallots: () => Observable<string[]>;
 }) {
-  const rounds = [];
-  const losingCandidates = [];
-  let winner = undefined;
+  const rounds: Record<string, number>[] = [];
+  const losingCandidates: string[] = [];
+  let winner;
   while (!winner) {
     const round = await fetchBallots()
       .pipe(
@@ -51,7 +51,7 @@ function whoIsThisBallotFor({
   ballot: string[];
   losingCandidates: string[];
 }): string {
-  return ballot.find(vote => !losingCandidates.includes(vote));
+  return ballot.find(vote => !losingCandidates.includes(vote))!;
 }
 
 function getWinner(bins: Record<string, number>) {
@@ -59,7 +59,8 @@ function getWinner(bins: Record<string, number>) {
     .values()
     .reduce((a, b) => a + b);
 
-  if (totalVotes === 0) throw new Error('cannot tally election results with 0 votes');
+  if (!totalVotes || totalVotes === 0)
+    throw new Error('cannot tally election results with 0 votes');
 
   return Object.keys(bins).find(key => bins[key] > totalVotes / 2);
 }

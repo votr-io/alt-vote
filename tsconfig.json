@@ -1,32 +1,19 @@
 {
   "compilerOptions": {
+    "target": "es2017",
     "module": "commonjs",
-    "esModuleInterop": true,
-    "declaration": false,
-    "target": "es2015",
-    "lib": [
-      "es5",
-      "es6",
-      "es7",
-      "dom",
-      "es2015.core",
-      "es2015.collection",
-      "es2015.generator",
-      "es2015.iterable",
-      "es2015.promise",
-      "es2015.proxy",
-      "es2015.reflect",
-      "es2015.symbol",
-      "es2015.symbol.wellknown",
-      "esnext.asynciterable"
-    ],
+    "lib": ["es2017", "dom"],
+    "moduleResolution": "node",
+    "strict": true,
     "rootDir": "./src",
     "outDir": "./build",
+    "declaration": true,
+    "declarationDir": "./build",
     "noImplicitAny": false,
-    "moduleResolution": "node",
-    "strictNullChecks": false,
-    "noEmitOnError": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noEmitOnError": true
   },
-  "include": ["src/**/*"]
+  "files": ["./src/index.ts"]
 }

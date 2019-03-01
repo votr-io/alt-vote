@@ -2,8 +2,12 @@
   "name": "alt-vote",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
+  "typings": "./build/index.d.ts",
   "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "test": "jest",
     "dev": "ts-node-dev --respawn src/index.ts"
   },
   "keywords": [],
