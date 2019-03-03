@@ -1,29 +1,33 @@
-import { Observable, from } from 'rxjs';
+import { Observable } from 'rxjs';
 import { reduce } from 'rxjs/operators';
 import * as _ from 'lodash';
 
-const candidates = ['A', 'B', 'C', 'D'];
+// const candidates = ['A', 'B', 'C', 'D'];
 
-const ballots = [
-  ['A', 'B', 'C', 'D'],
-  ['B', 'D', 'A', 'C'],
-  ['D', 'B', 'C'],
-  ['B', 'A', 'D', 'C'],
-  ['A', 'C', 'B', 'D'],
-  ['C', 'B', 'D', 'A'],
-];
+// const ballots = [
+//   ['A', 'B', 'C', 'D'],
+//   ['B', 'D', 'A', 'C'],
+//   ['D', 'B', 'C'],
+//   ['B', 'A', 'D', 'C'],
+//   ['A', 'C', 'B', 'D'],
+//   ['C', 'B', 'D', 'A'],
+// ];
 
-async function getResults({
-  candidates,
+// const ballots = [['A'], ['A'], ['B'], ['B'], ['C', 'D', 'B'], ['C', 'D', 'B'], ['D']];
+
+//this will represent the bin to hold ballots that don't have any votes for a candidate remaining in the race
+const TRASH = 'trash';
+
+export async function getResults({
   fetchBallots,
 }: {
-  candidates: string[];
   fetchBallots: () => Observable<string[]>;
 }) {
   const rounds: Record<string, number>[] = [];
   const losingCandidates: string[] = [];
   let winner;
   while (!winner) {
+    //   for (let i = 0; i < 5; i++) {
     const round = await fetchBallots()
       .pipe(
         reduce<string[], Record<string, number>>((acc, ballot) => {
@@ -39,6 +43,9 @@ async function getResults({
     rounds.push(round);
     winner = getWinner(round);
     losingCandidates.push(getLast(round));
+    // console.log(i);
+    // console.log(round);
+    // console.log(`loseers: ${losingCandidates}\n\n`);
   }
 
   return { winner, rounds };
@@ -51,28 +58,43 @@ function whoIsThisBallotFor({
   ballot: string[];
   losingCandidates: string[];
 }): string {
-  return ballot.find(vote => !losingCandidates.includes(vote))!;
+  return ballot.find(vote => !losingCandidates.includes(vote)) || TRASH;
 }
 
 function getWinner(bins: Record<string, number>) {
-  const totalVotes = _(bins)
+  const totalVotes = _(getRemaining(bins))
     .values()
     .reduce((a, b) => a + b);
 
   if (!totalVotes || totalVotes === 0)
     throw new Error('cannot tally election results with 0 votes');
 
-  return Object.keys(bins).find(key => bins[key] > totalVotes / 2);
+  return Object.keys(getRemaining(bins)).find(key => bins[key] > totalVotes / 2);
 }
 
 function getLast(bins: Record<string, number>) {
-  return Object.keys(bins).reduce((a, b) => (bins[a] < bins[b] ? a : b));
+  /*
+    tiebreaker logic:
+    whichever bin was created last this round will have the disadvantage
+    this is pretty random (ie. based on the order that candidates appear 
+    on ballots of this round), but deterministic.
+
+    If someone has a better idea let me know.
+
+    This is extremely unlikely to happen with a decent number of votes.
+
+    */
+  return Object.keys(getRemaining(bins)).reduce((a, b) => (bins[a] < bins[b] ? a : b));
 }
 
-getResults({ candidates, fetchBallots: () => from(ballots) }).then(console.log);
+//helper to filter out the trash bin
+function getRemaining(bins): Record<string, number> {
+  return Object.keys(bins)
+    .filter(key => key !== TRASH)
+    .reduce((acc, key) => {
+      acc[key] = bins[key];
+      return acc;
+    }, {});
+}
 
-/*
-- not what we hired you for
-- making my job harder
-- driving social change and this isn't what we're looking for
-*/
+// getResults({ fetchBallots: () => from(ballots) }).then(console.log);
