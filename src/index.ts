@@ -43,9 +43,6 @@ export async function getResults({
     rounds.push(round);
     winner = getWinner(round);
     losingCandidates.push(getLast(round));
-    // console.log(i);
-    // console.log(round);
-    // console.log(`loseers: ${losingCandidates}\n\n`);
   }
 
   return { winner, rounds };
@@ -74,15 +71,15 @@ function getWinner(bins: Record<string, number>) {
 
 function getLast(bins: Record<string, number>) {
   /*
-    tiebreaker logic:
-    whichever bin was created last this round will have the disadvantage
-    this is pretty random (ie. based on the order that candidates appear 
-    on ballots of this round), but deterministic.
+    Tiebreaker Logic:
+    Whichever bin was created last this round will have the disadvantage.
+    This is pretty random since it's based on the order that candidates appear 
+    on ballots of this round, however it is deterministic,which is great 
+    for replayability and tests.
 
     If someone has a better idea let me know.
 
-    This is extremely unlikely to happen with a decent number of votes.
-
+    Tiebreakers are extremely unlikely to happen with a decent number of votes.
     */
   return Object.keys(getRemaining(bins)).reduce((a, b) => (bins[a] < bins[b] ? a : b));
 }
