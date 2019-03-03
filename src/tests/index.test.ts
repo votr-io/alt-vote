@@ -22,6 +22,7 @@ fs.readdirSync(TEST_ELECTIONS_DIRECTORY)
           return from(ballots);
         },
       });
+      console.log(results);
       expect(results.winner).toBe(expectedWinner);
     });
   });
