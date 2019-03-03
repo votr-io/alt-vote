@@ -18,13 +18,18 @@ import * as _ from 'lodash';
 //this will represent the bin to hold ballots that don't have any votes for a candidate remaining in the race
 const TRASH = '_trash';
 
+export interface ElectionResults {
+  winner: string;
+  rounds: Record<string, number>[];
+}
+
 export async function getResults({
   fetchBallots,
   errorOnInvalidBallot = false,
 }: {
   fetchBallots: () => Observable<string[]>;
   errorOnInvalidBallot?: boolean;
-}) {
+}): Promise<ElectionResults> {
   const rounds: Record<string, number>[] = [];
   const losingCandidates: string[] = [];
   let winner;
